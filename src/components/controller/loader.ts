@@ -1,6 +1,8 @@
 import { RequestMethod, Endpoints } from '../../types/enums';
 import { LoaderOptions, RequestParams } from '../../types/interfaces';
 
+type ResponseCallback<T> = (data: T) => void;
+
 class Loader {
     protected baseLink: string;
     protected options: Readonly<LoaderOptions>;
@@ -12,11 +14,11 @@ class Loader {
 
     public getResp<T>(
         { endpoint, options = {} }: RequestParams,
-        callback: (data: T) => void = () => {
+        callback: ResponseCallback<T> = () => {
             console.error('No callback for GET response');
         }
     ): void {
-        this.load<T>(RequestMethod.GET, endpoint, options);
+        this.load<T>(RequestMethod.GET, endpoint, options, callback);
     }
 
     private errorHandler(res: Response): Response {
@@ -40,15 +42,17 @@ class Loader {
         return url.slice(0, -1);
     }
 
-    private async load<T>(
+    private load<T>(
         method: RequestMethod,
         endpoint: string,
-        options: Partial<LoaderOptions> = {}
-    ): Promise<T> {
-        const response = await fetch(this.makeUrl(options, endpoint), { method });
-        const handled = this.errorHandler(response);
-        const data = (await handled.json()) as T;
-        return data;
+        options: Partial<LoaderOptions>,
+        callback: ResponseCallback<T>
+    ): void {
+        fetch(this.makeUrl(options, endpoint), { method })
+            .then((res: Response) => this.errorHandler(res))
+            .then((res: Response) => res.json() as Promise<T>)
+            .then((data: T) => callback(data))
+            .catch((err: Error) => console.error(err));
     }
 }
 
