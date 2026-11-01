@@ -1,37 +1,32 @@
 import AppLoader from './appLoader';
+import { Endpoints } from '../../types/enums';
+import { NewsResponse, SourcesResponse } from '../../types/interfaces';
 
 class AppController extends AppLoader {
-    getSources(callback) {
-        super.getResp(
-            {
-                endpoint: 'sources',
-            },
-            callback
-        );
+    public getSources(callback: (data: SourcesResponse) => void): void {
+        super.getResp<SourcesResponse>({ endpoint: Endpoints.SOURCES }, callback);
     }
 
-    getNews(e, callback) {
-        let target = e.target;
-        const newsContainer = e.currentTarget;
+    public getNews(e: Event, callback: (data: NewsResponse) => void): void {
+        let target = e.target as HTMLElement | null;
+        const newsContainer = e.currentTarget as HTMLElement;
 
-        while (target !== newsContainer) {
+        while (target && target !== newsContainer) {
             if (target.classList.contains('source__item')) {
                 const sourceId = target.getAttribute('data-source-id');
-                if (newsContainer.getAttribute('data-source') !== sourceId) {
+                if (sourceId && newsContainer.getAttribute('data-source') !== sourceId) {
                     newsContainer.setAttribute('data-source', sourceId);
-                    super.getResp(
+                    super.getResp<NewsResponse>(
                         {
-                            endpoint: 'everything',
-                            options: {
-                                sources: sourceId,
-                            },
+                            endpoint: Endpoints.EVERYTHING,
+                            options: { sources: sourceId },
                         },
                         callback
                     );
                 }
                 return;
             }
-            target = target.parentNode;
+            target = target.parentNode as HTMLElement | null;
         }
     }
 }
