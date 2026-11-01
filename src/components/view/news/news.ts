@@ -26,14 +26,9 @@ class News {
                 .join('-');
 
             (newsClone.querySelector('.news__description-title') as HTMLElement).textContent = item.title;
-            (newsClone.querySelector('.news__description-source') as HTMLElement).textContent =
-                item.source.name;
-            (newsClone.querySelector('.news__description-content') as HTMLElement).textContent =
-                item.description ?? '';
-            (newsClone.querySelector('.news__read-more a') as HTMLAnchorElement).setAttribute(
-                'href',
-                item.url
-            );
+            (newsClone.querySelector('.news__description-source') as HTMLElement).textContent = item.source.name;
+            (newsClone.querySelector('.news__description-content') as HTMLElement).textContent = item.description ?? '';
+            (newsClone.querySelector('.news__read-more a') as HTMLAnchorElement).setAttribute('href', item.url);
 
             fragment.append(newsClone);
         });

@@ -1,4 +1,4 @@
-import { RequestMethod, Endpoints } from '../../types/enums';
+import { RequestMethod } from '../../types/enums';
 import { LoaderOptions, RequestParams } from '../../types/interfaces';
 
 type ResponseCallback<T> = (data: T) => void;
