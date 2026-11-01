@@ -3,37 +3,54 @@ const { merge } = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const DotenvWebpackPlugin = require('dotenv-webpack');
-
-const baseConfig = {
-    entry: path.resolve(__dirname, './src/index.js'),
-    mode: 'development',
-    module: {
-        rules: [
-            {
-                test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
-            },
-        ],
-    },
-    resolve: {
-        extensions: ['.js'],
-    },
-    output: {
-        filename: 'index.js',
-        path: path.resolve(__dirname, './dist'),
-    },
-    plugins: [
-        new DotenvWebpackPlugin(),
-        new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, './src/index.html'),
-            filename: 'index.html',
-        }),
-        new CleanWebpackPlugin(),
-    ],
-};
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = ({ mode }) => {
     const isProductionMode = mode === 'prod';
+
+    const baseConfig = {
+        entry: path.resolve(__dirname, './src/index.ts'),
+        mode: 'development',
+        module: {
+            rules: [
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader'],
+                },
+                {
+                    test: /\.tsx?$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/,
+                },
+            ],
+        },
+        resolve: {
+            extensions: ['.tsx', '.ts', '.js'],
+        },
+        output: {
+            filename: 'index.js',
+            path: path.resolve(__dirname, './dist'),
+        },
+        plugins: [
+            new DotenvWebpackPlugin({
+                path: `./.env.${isProductionMode ? 'production' : 'development'}`
+            }),
+            new HtmlWebpackPlugin({
+                template: path.resolve(__dirname, './src/index.html'),
+                filename: 'index.html',
+            }),
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: path.resolve(__dirname, './src/rss-logo.svg'),
+                        to: path.resolve(__dirname, './dist'),
+                    },
+                ],
+            }),
+            new CleanWebpackPlugin(),
+        ],
+    };
+
     const envConfig = isProductionMode ? require('./webpack.prod.config') : require('./webpack.dev.config');
 
     return merge(baseConfig, envConfig);
